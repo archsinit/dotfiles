@@ -1,0 +1,9 @@
+[user]
+	name = archsinit
+	email = archsinit@protonmail.com
+[init]
+	defaultBranch = main
+[pull]
+	rebase = false
+[core]
+	editor = nvim
