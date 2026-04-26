@@ -20,31 +20,29 @@ dotpush() {
   git -C "$src" push
 }
 
-# Open (or attach to) the dev tmux session.
+# Set up dev panes in the current tmux window.
 # Usage: dev [project-dir]  (defaults to ~/Developer)
 dev() {
-  local session="dev"
   local project_dir="${1:-$HOME/Developer}"
 
-  if ! tmux has-session -t "$session" 2>/dev/null; then
-    tmux new-session -d -s "$session" -c "$project_dir" -n nvim
-    tmux send-keys -t "$session:1.1" "cd \"$project_dir\" && nvim" C-m
-
-    tmux split-window -h -p 50 -t "$session:1.1" -c "$project_dir"
-    tmux send-keys -t "$session:1.2" "cd \"$project_dir\" && codex" C-m
-
-    tmux split-window -v -p 50 -t "$session:1.2" -c "$project_dir"
-    tmux send-keys -t "$session:1.3" "cd \"$project_dir\" && claude" C-m
-
-    tmux select-pane -t "$session:1.1"
+  if [ -z "$TMUX" ]; then
+    echo "dev: must be run from inside a tmux session"
+    return 1
   fi
 
-  if [ -n "$TMUX" ]; then
-    tmux switch-client -t "$session"
-  else
-    tmux attach-session -t "$session"
-  fi
+  tmux rename-window "dev"
+  tmux send-keys "cd \"$project_dir\" && nvim" C-m
+
+  tmux split-window -h -p 50 -c "$project_dir"
+  tmux send-keys "cd \"$project_dir\" && codex" C-m
+
+  tmux split-window -v -p 50 -c "$project_dir"
+  tmux send-keys "cd \"$project_dir\" && claude" C-m
+
+  tmux select-pane -t 1
 }
 
 # Auto-start tmux when opening a new terminal window.
-[ -z "$TMUX" ]
+if [ -z "$TMUX" ]; then
+  exec tmux new-session
+fi
