@@ -47,4 +47,4 @@ dev() {
 }
 
 # Auto-start tmux when opening a new terminal window.
-[ -z "$TMUX" ] && dev
+[ -z "$TMUX" ] && ~
