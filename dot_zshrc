@@ -88,6 +88,9 @@ alias h='history'
 alias zshrc='nvim /Users/dev/.local/share/chezmoi/dot_zhsrc'
 alias reload='source ~/.zshrc'
 
+# chezmoi
+alias dot='cd ~/.local/share/chezmoi'
+
 # -- FUNCTIONS -------------------------
 
 # nvm
@@ -109,3 +112,9 @@ autoload -Uz vcs_info
 precmd() { vcs_info }
 zstyle ':vcs_info:git:*' formats ' %F{blue}(%b)%f'
 PROMPT='%F{red}%1~%f${vcs_info_msg_0_} › '
+
+# Ghostty
+precmd() {
+  vcs_info
+  echo -ne "\033]0;${PWD/#$HOME/~}\007"
+}

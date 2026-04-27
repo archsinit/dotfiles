@@ -1,0 +1,10 @@
+font-family = JetBrains Mono Nerd Font
+font-size = 14
+theme = "Ayu Light"
+window-decoration = true
+
+scrollback-limit = 10000
+copy-on-select = true        
+cursor-style = bar            
+
+shell-integration = zsh
