@@ -1,107 +1,111 @@
-# PATH
+# ~/.zshrc
+
+# -- WELCOME ---------------------------
+cat << 'EOF'
+                 _         _       _ _   
+  __ _ _ __ ___| |__  ___ (_)_ __ (_) |_ 
+ / _` | '__/ __|| '_ \/ __|| | '_ \| | __|
+| (_| | | | (__| | | \__ \| | | | | | |_ 
+ \__,_|_|  \___|_| |_|___/|_|_| |_|_|\__|
+
+EOF
+
+# -- PATH ------------------------------
+
 export PATH="$HOME/.local/bin:$PATH"
+
+# -- OPTIONS ---------------------------
+
+setopt AUTO_CD                
+setopt AUTO_PUSHD            
+setopt PUSHD_IGNORE_DUPS    
+setopt CORRECT
+setopt EXTENDED_GLOB          
+setopt GLOB_DOTS             
+setopt NO_BEEP                
+setopt INTERACTIVE_COMMENTS  
+setopt PROMPT_SUBST
+setopt HIST_IGNORE_DUPS     
+setopt HIST_IGNORE_SPACE   
+setopt HIST_VERIFY        
+setopt SHARE_HISTORY     
+setopt APPEND_HISTORY   
+setopt MENU_COMPLETE
+setopt AUTO_LIST   
+setopt COMPLETE_IN_WORD 
+
+# -- HISTORY ---------------------------
+
+HISTFILE=~/.zsh_history    
+HISTSIZE=10000            
+SAVEHIST=10000           
+
+# -- COMPLETIONS -----------------------
+autoload -Uz compinit
+compinit
+zstyle ':completion:*' menu select                   
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}' 
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+
+# -- KEYBINDINGS -----------------------
+
+bindkey -v
+KEYTIMEOUT=1
+bindkey "^?" backward-delete-char
+bindkey "^[[A" history-beginning-search-backward  # up arrow key
+bindkey "^[[B" history-beginning-search-forward   # down arrow key
+
+function zle-keymap-select {
+  if [[ $KEYMAP == vicmd ]]; then
+    echo -ne '\e[1 q'   # block cursor = normal mode
+  else
+    echo -ne '\e[5 q'   # beam cursor = insert mode
+  fi
+}
+zle -N zle-keymap-select
+
+# -- ALIASES ---------------------------
+
+# Navigation
+alias ..='cd ..'
+alias ...='cd ...'
+
+# List Files
+alias ls='ls -G'
+alias ll='ls -lhG'
+alias la='ls -lahG'
+
+# Confirmation Before Action
+alias cp='cp -i'
+alias mv='mv -i'
+alias rm='rm -i'
+
+# Commonly Used Commands
+alias c='clear'
+alias h='history'
+
+# Update .zshrc
+alias zshrc='nvim /Users/dev/.local/share/chezmoi/dot_zhsrc'
+alias reload='source ~/.zshrc'
+
+# -- FUNCTIONS -------------------------
 
 # nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
 [ -s "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm" ] && \. "$(brew --prefix)/opt/nvm/etc/bash_completion.d/nvm"
 
-# Sync dotfiles: apply, commit, and push to remote.
-# Usage: dotpush [commit message]
-dotpush() {
-  local msg="${1:-update dotfiles $(date +%Y-%m-%d)}"
-  local src
-  src="$(chezmoi source-path)"
-
-  chezmoi apply || return 1
-  git -C "$src" add -A
-  git -C "$src" diff --cached --quiet && echo "nothing to commit" && return 0
-  git -C "$src" commit -m "$msg"
-  git -C "$src" push
-}
-
-# Set up dev panes in the current tmux window.
-# Usage: dev [project-dir]  (defaults to ~/Developer)
-dev() {
-  local project_dir="${1:-$HOME/Developer}"
-
-  if [ -z "$TMUX" ]; then
-    echo "dev: must be run from inside a tmux session"
-    return 1
-  fi
-
-  tmux rename-window "dev"
-  tmux send-keys "cd \"$project_dir\" && nvim" C-m
-
-  tmux split-window -h -p 50 -c "$project_dir"
-  tmux send-keys "cd \"$project_dir\" && codex" C-m
-
-  tmux split-window -v -p 50 -c "$project_dir"
-  tmux send-keys "cd \"$project_dir\" && claude" C-m
-
-  tmux select-pane -t 1
-}
-
-# Auto-start tmux when opening a new terminal window.
+# tmux
 if [ -z "$TMUX" ]; then
   exec tmux new-session
 fi
 
+# fzf
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# ── Notes ─────────────────────────────────────────────────────────────
-export NOTES="$HOME/Documents/notes"
+# -- PROMPT ----------------------------
 
-# Go to notes folder instantly
-alias n="cd $NOTES"
-
-# Open a specific note by fuzzy search
-nf() {
-  local file
-  file=$(find "$NOTES" -type f -name "*.md" | fzf --preview 'cat {}')
-  [[ -n "$file" ]] && nvim "$file"
-}
-
-# Create a new dated journal entry and open it
-nj() {
-  local date=$(date +%Y-%m-%d)
-  local year=$(date +%Y)
-  local month=$(date +%m)
-  local file="$NOTES/journals/${year}/${month}/${date}.md"
-  mkdir -p "$NOTES/journals"
-  [[ ! -f "$file" ]] && echo "# ${date}" > "$file"
-  nvim "$file"
-}
-
-# Quick inbox capture — write a thought without opening an editor
-ni() {
-  local date=$(date +%Y-%m-%d\ %H:%M)
-  echo "- [${date}] $*" >> "$NOTES/inbox/capture.md"
-  echo "captured."
-}
-
-# Search inside all notes by content
-ns() {
-  rg --type md "$*" "$NOTES" | fzf
-}
-
-# Git commit everything with a message
-nc() {
-  cd "$NOTES" && git add . && git commit -m "$*"
-}
-
-# Push to VPS
-np() {
-  cd "$NOTES" && git push
-}
-
-# Git status shortcut
-nst() {
-  cd "$NOTES" && git status
-}
-
-# Log shortcut
-nl() {
-  cd "$NOTES" && git log --oneline --graph
-}
-# ──────────────────────────────────────────────────────────────────────
+autoload -Uz vcs_info
+precmd() { vcs_info }
+zstyle ':vcs_info:git:*' formats ' %F{blue}(%b)%f'
+PROMPT='%F{red}%1~%f${vcs_info_msg_0_} › '
