@@ -48,3 +48,58 @@ if [ -z "$TMUX" ]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# ── Notes ─────────────────────────────────────────────────────────────
+export NOTES="$HOME/Documents/notes"
+
+# Go to notes folder instantly
+alias n="cd $NOTES"
+
+# Open a specific note by fuzzy search
+nf() {
+  local file
+  file=$(find "$NOTES" -type f -name "*.md" | fzf --preview 'cat {}')
+  [[ -n "$file" ]] && nvim "$file"
+}
+
+# Create a new dated journal entry and open it
+nj() {
+  local date=$(date +%Y-%m-%d)
+  local file="$NOTES/journals/${date}.md"
+  mkdir -p "$NOTES/journals"
+  [[ ! -f "$file" ]] && echo "# ${date}" > "$file"
+  nvim "$file"
+}
+
+# Quick inbox capture — write a thought without opening an editor
+ni() {
+  local date=$(date +%Y-%m-%d\ %H:%M)
+  echo "- [${date}] $*" >> "$NOTES/inbox/capture.md"
+  echo "captured."
+}
+
+# Search inside all notes by content
+ns() {
+  rg --type md "$*" "$NOTES" | fzf
+}
+
+# Git commit everything with a message
+nc() {
+  cd "$NOTES" && git add . && git commit -m "$*"
+}
+
+# Push to VPS
+np() {
+  cd "$NOTES" && git push
+}
+
+# Git status shortcut
+nst() {
+  cd "$NOTES" && git status
+}
+
+# Log shortcut
+nl() {
+  cd "$NOTES" && git log --oneline --graph
+}
+# ──────────────────────────────────────────────────────────────────────
