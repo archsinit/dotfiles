@@ -24,6 +24,14 @@ autocmd("BufReadPost", {
 })
 
 autocmd("FileType", {
+  group = group("lua_treesitter_fix"),
+  pattern = "lua",
+  callback = function()
+    pcall(vim.treesitter.stop)
+  end,
+})
+
+autocmd("FileType", {
   group = group("markdown_settings"),
   pattern = "markdown",
   callback = function()
@@ -54,7 +62,7 @@ autocmd("BufWritePre", {
 autocmd("BufWritePre", {
   group = group("auto_mkdir"),
   callback = function(event)
-    local file = vim.loop.fs_realpath(event.match) or event.match
+    local file = vim.uv.fs_realpath(event.match) or event.match
     vim.fn.mkdir(vim.fn.fnamemodify(file, ":p:h"), "p")
   end,
 })
