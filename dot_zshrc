@@ -65,7 +65,9 @@ nf() {
 # Create a new dated journal entry and open it
 nj() {
   local date=$(date +%Y-%m-%d)
-  local file="$NOTES/journals/${date}.md"
+  local year=$(date +%Y)
+  local month=$(date +%m)
+  local file="$NOTES/journals/${year}/${month}/${date}.md"
   mkdir -p "$NOTES/journals"
   [[ ! -f "$file" ]] && echo "# ${date}" > "$file"
   nvim "$file"
