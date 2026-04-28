@@ -44,3 +44,57 @@ map("n", "]q", "<cmd>cnext<CR>zz")
 map("n", "[q", "<cmd>cprev<CR>zz")
 map("n", "<leader>co", "<cmd>copen<CR>")
 map("n", "<leader>cc", "<cmd>cclose<CR>")
+
+-- Zettelkasten
+local zk = vim.fn.expand("~/Documents/notes/zettelkasten/scripts")
+
+local function zk_fzf(script, arg)
+    local tmp = vim.fn.tempname()
+    local cmd = "python3 " .. script
+    if arg ~= "" then
+        cmd = cmd .. " " .. vim.fn.shellescape(arg)
+    end
+    vim.cmd("botright 15new")
+    vim.fn.jobstart(cmd .. " > " .. tmp, {
+        term = true,
+        on_exit = function()
+            vim.cmd("bdelete!")
+            local ok, lines = pcall(vim.fn.readfile, tmp)
+            if ok and #lines > 0 and lines[1] ~= "" then
+                local parts = vim.split(lines[1], "\t")
+                vim.cmd("edit " .. vim.fn.fnameescape(parts[#parts]))
+            end
+        end
+    })
+    vim.cmd("startinsert")
+end
+
+map("n", "<leader>zn", function()
+    local title = vim.fn.input("Note title: ")
+    if title == "" then return end
+    local path = vim.fn.trim(vim.fn.system(
+        "python3 " .. zk .. "/new_note.py " .. vim.fn.shellescape(title)
+    ))
+    if path ~= "" then
+        vim.cmd("edit " .. vim.fn.fnameescape(path))
+    end
+end)
+
+map("n", "<leader>zf", function()
+    local word = vim.fn.expand("<cWORD>")
+    local path = vim.fn.trim(vim.fn.system(
+        "python3 " .. zk .. "/follow_link.py " .. vim.fn.shellescape(word)
+    ))
+    if path ~= "" then
+        vim.cmd("edit " .. vim.fn.fnameescape(path))
+    end
+end)
+
+map("n", "<leader>zb", function()
+    local id = vim.fn.expand("%:t:r")
+    zk_fzf(zk .. "/backlinks.py", id)
+end)
+
+map("n", "<leader>zs", function()
+    zk_fzf(zk .. "/search_notes.py", "")
+end)
