@@ -101,3 +101,21 @@ end)
 map("n", "<leader>zs", function()
     zk_fzf(zk .. "/search_notes.py", "")
 end)
+
+map("n", "<leader>zi", function()
+    local tmp = vim.fn.tempname()
+    vim.cmd("botright 15new")
+    vim.fn.jobstart("python3 " .. zk .. "/search_notes.py > " .. tmp, {
+        term = true,
+        on_exit = function()
+            vim.cmd("bdelete!")
+            local ok, lines = pcall(vim.fn.readfile, tmp)
+            if ok and #lines > 0 and lines[1] ~= "" then
+                local parts = vim.split(lines[1], "\t")
+                local id = vim.fn.fnamemodify(parts[#parts], ":t:r")
+                vim.api.nvim_put({"[[" .. id .. "]]"}, "c", true, true)
+            end
+        end
+    })
+    vim.cmd("startinsert")
+end)
