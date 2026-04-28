@@ -70,10 +70,13 @@ local function zk_fzf(script, arg)
 end
 
 map("n", "<leader>zn", function()
+    local kind = vim.fn.input("Kind (d=default, l=literature): ")
+    if kind == "" then return end
     local title = vim.fn.input("Note title: ")
     if title == "" then return end
+    local flag = kind == "l" and " --literature" or ""
     local path = vim.fn.trim(vim.fn.system(
-        "python3 " .. zk .. "/new_note.py " .. vim.fn.shellescape(title)
+        "python3 " .. zk .. "/new_note.py " .. vim.fn.shellescape(title) .. flag
     ))
     if path ~= "" then
         vim.cmd("edit " .. vim.fn.fnameescape(path))
