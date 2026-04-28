@@ -91,6 +91,9 @@ alias h='history'
 alias zshrc='nvim /Users/dev/.local/share/chezmoi/dot_zshrc'
 alias reload='source ~/.zshrc'
 
+# ledger
+alias lf='ledger -f ~/Documents/notes/finances/ledger.journal'
+
 # -- FUNCTIONS -------------------------
 
 # nvm
