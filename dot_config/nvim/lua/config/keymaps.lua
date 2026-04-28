@@ -99,7 +99,20 @@ map("n", "<leader>zb", function()
 end)
 
 map("n", "<leader>zs", function()
-    zk_fzf(zk .. "/search_notes.py", "")
+    local tmp = vim.fn.tempname()
+    vim.cmd("botright 15new")
+    vim.fn.jobstart("python3 " .. zk .. "/search_notes.py > " .. tmp, {
+        term = true,
+        on_exit = function()
+            vim.cmd("bdelete!")
+            local ok, lines = pcall(vim.fn.readfile, tmp)
+            if ok and #lines > 0 and lines[1] ~= "" then
+                local parts = vim.split(lines[1], ":")
+                vim.cmd("edit " .. vim.fn.fnameescape(parts[1]))
+            end
+        end
+    })
+    vim.cmd("startinsert")
 end)
 
 map("n", "<leader>zi", function()
@@ -111,8 +124,8 @@ map("n", "<leader>zi", function()
             vim.cmd("bdelete!")
             local ok, lines = pcall(vim.fn.readfile, tmp)
             if ok and #lines > 0 and lines[1] ~= "" then
-                local parts = vim.split(lines[1], "\t")
-                local id = vim.fn.fnamemodify(parts[#parts], ":t:r")
+                local parts = vim.split(lines[1], ":")
+                local id = vim.fn.fnamemodify(parts[1], ":t:r")
                 vim.api.nvim_put({"[[" .. id .. "]]"}, "c", true, true)
             end
         end
