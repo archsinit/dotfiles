@@ -6,7 +6,6 @@ map("i", "kj", "<Esc>")
 map("n", "<leader>w", "<cmd>write<CR>")
 map("n", "<leader>q", "<cmd>quit<CR>")
 map("n", "<leader>h", "<cmd>nohlsearch<CR>")
-map("n", "<leader>e", "<cmd>Explore<CR>")
 map("n", "<leader><space>", "zz")
 
 map("n", "G", "Gzz")
