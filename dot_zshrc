@@ -95,6 +95,7 @@ alias reload='source ~/.zshrc'
 # ledger
 alias ldgr='nvim ~/Documents/notes/finances/ledger.journal'
 alias lbal='ledger -f ~/Documents/notes/finances/ledger.journal --price-db ~/Documents/notes/finances/prices.db bal'
+alias lbud='ledger -f finances/ledger.journal budget --exchange USD --price-db ~/Documents/notes/finances/prices.db'
 
 # -- FUNCTIONS -------------------------
 
